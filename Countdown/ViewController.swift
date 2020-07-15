@@ -9,119 +9,131 @@
 import UIKit
 
 class ViewController: UIViewController {
-    // 2
+    
+    //Mark: Step 2
     enum Section {
-     case main // one section for table view
-    }
-    
-    
-    private var tableView: UITableView!
-    // 1
-    // define the UITableViewDiffableDataSource instance
-    private var dataSource: UITableViewDiffableDataSource<ViewController.Section, Int>!
-    private var timer: Timer!
-    private var startInterval = 10 // seconds
-    
-    
-    
-    override func viewDidAppear(_ animated: Bool) {
-     super.viewDidAppear(animated)
-        configureNavBar()
-     configureTableView()
-     configureDataSource()
-    }
-    
-    private func configureNavBar() {
-        navigationItem.title = "Countdown with diffable data source"
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(startCountdown))
-    }
-    
-    
-    private func configureTableView() {
-     tableView = UITableView(frame: view.bounds, style: .plain)
-     tableView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-     tableView.backgroundColor = .systemBackground
-     tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-     view.addSubview(tableView)
-    }
-    private func configureDataSource() {
-     dataSource = UITableViewDiffableDataSource<ViewController.Section, Int>(tableView: tableView, cellProvider: { (tableView, indexPath, value) -> UITableViewCell? in
-      let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-       // Why is this code not working
-        if value == -1 {
-            cell.textLabel?.text = "App launched All looks goood so far with Crashlytics "
-            cell.textLabel?.numberOfLines = 0
-        } else {
-          cell.textLabel?.text = "\(value)"
-        }
-      
-      return cell
-     })
-        
-     // set type of animation on the data source
-     dataSource.defaultRowAnimation = .fade // .automatic
-     // setup snapshot
-     var snapshot = NSDiffableDataSourceSnapshot<ViewController.Section, Int>()
-     // add sections
-     snapshot.appendSections([.main])
-     // add items for section
-     snapshot.appendItems([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-     // apply changes to the datSource
-     dataSource.apply(snapshot, animatingDifferences: true)
-    }
-    
-   @objc private func startCountdown() {
-        if timer != nil { // if the timer is not equal to nil than ...
-            timer.invalidate()
-        }
-        // configure the timer
-        // set interval for countdown
-        // assign a method that gets called every second
-        
-        timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(decrementCounter), userInfo: nil, repeats: true)
-    
-    
-        // reset our startingInteval
-        startInterval = 10 // seconds
-        
-        // setup snapshot
-//        var snapshot = NSDiffableDataSourceSnapshot<ViewController.Section, Int>()
-//        snapshot.appendSections([.main])
-//        snapshot.appendItems([startInterval]) // start at 10
-//        dataSource.apply(snapshot, animatingDifferences: false)
-    }
-    
-   @objc private func decrementCounter(){
-    // get access to the snapshot to manipulate data
-    //snapshot is the "source of truth" for the table view's data
-    
-    var snapshot = dataSource.snapshot()
-    
-    guard startInterval > 0 else {
-        timer.invalidate()
-        ship()
-        return
-    }
-    startInterval -= 1 //10, 9, 8 .... 0
-    snapshot.appendItems([startInterval]) // 9 is inserted in table view
-    dataSource.apply(snapshot, animatingDifferences: true)
-    
-        
-    }
-    
-    private func ship() {
-        var snapshot = dataSource.snapshot()
-        snapshot.appendItems([-1])
-        dataSource.apply(snapshot, animatingDifferences: true)
-        
-    }
+           case main // one section for tableview
+       }
+       
+       private var tableView: UITableView!
+       
+       // define the UITableViewDiffereableDataSource instance
+       private var dataSource : UITableViewDiffableDataSource<Section, Int>!
+       
+       private var timer: Timer!
+       
+       private var startInterval = 10 // seconds
+       override func viewDidLoad() {
+           super.viewDidLoad()
+          
+       }
 
+       override func viewDidAppear(_ animated: Bool) {
+           super.viewDidAppear(true)
+           configureTableView()
+           
+               configureDataSource()
+       configureNavBar()
+           
+       }
+       
+       private func configureNavBar(){
+           navigationItem.title = "countdown "
+           navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(startCountdown))
+       }
+       
+       private func configureTableView(){
+           // can also do this in storyboard
+           
+           // setting tableview to take up everything
+           tableView = UITableView(frame: view.bounds, style: .plain)
+           tableView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+           tableView.backgroundColor = .systemPink
+           
+           tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+           
+           view.addSubview(tableView)
+           
+       }
+       
+       private func configureDataSource() {
+           
+           dataSource = UITableViewDiffableDataSource<Section, Int>(tableView: tableView, cellProvider: { (tableView, indexPath, value ) ->
+               UITableViewCell? in
+               let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+               
+               if value == -1 {
+                   cell.textLabel?.text = "🚀 it looks good so far, look at crashlytics "
+                   cell.textLabel?.numberOfLines = 0
+               } else {
+                       cell.textLabel?.text = "\(value)"
 
+                   }
 
-
-
-
-
+               
+               return cell
+           })
+           
+           // set up type of animation for the datasource
+           dataSource.defaultRowAnimation = .fade
+           
+           /*
+           // MARK: this is for demonstrating purposes
+           // setup snapshot
+           var snapshot = NSDiffableDataSourceSnapshot<Section, Int>()
+           // add sections
+           snapshot.appendSections([.main])
+           snapshot.appendItems([1,2,3,4,5,6,7,8,9,10]) // this is to test results
+           
+           dataSource.apply(snapshot, animatingDifferences: true)
+    */
+           startCountdown()
+       }
+       
+      @objc private func startCountdown(){
+           if timer != nil {
+               timer.invalidate() // says the timer is done
+           }
+           // configure the timer
+           // set interval for countdown
+           // assign a method that gets called every seconf
+           
+           timer = Timer.scheduledTimer(timeInterval: 1.0 , target: self, selector: #selector(decrementCounter), userInfo: nil, repeats: true)
+           
+           // reset our starting interval if its done
+           startInterval = 10 // seconds
+           
+           // setup snapshot again
+           
+           var snapshot = NSDiffableDataSourceSnapshot<Section, Int>()
+           
+           snapshot.appendSections([.main])
+           snapshot.appendItems([startInterval]) // starts at 10
+           dataSource.apply(snapshot, animatingDifferences: true)
+       }
+       
+      @objc private func decrementCounter(){
+           // get access to snapshot in order to manipulate the data
+       // snapshot is the source for the data
+       var snapshot = dataSource.snapshot()
+       guard startInterval > 0 else {
+           timer.invalidate()
+           ship()
+           return
+       }
+       
+       startInterval -= 1 // 10, 9 , 8 ... 0
+       snapshot.appendItems([startInterval]) // 9 is inserted into the tableview
+       // not removing only appending
+       dataSource.apply(snapshot, animatingDifferences: true)
+       
+       }
+       
+       private func ship(){
+           var snapshot = dataSource.snapshot()
+           snapshot.appendItems([-1])
+           dataSource.apply(snapshot, animatingDifferences: true)
+       }
 
 
 }
